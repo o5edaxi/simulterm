@@ -117,7 +117,7 @@ if (( LINK_LOCAL == 1 )); then
 	(( FOUND_ADDRESSES > BATCH_MAX )) && { echo "The number of discovered addresses is ${FOUND_ADDRESSES}, which exceeds the selected maximum of ${BATCH_MAX}. Exiting..."; exit 1; }
 	
 	echo "Autodiscovery complete. Found $FOUND_ADDRESSES addresses."
-	destinations_list=$PING6_REPLIES
+	destinations_list=( "${PING6_REPLIES[@]}" )
 	
 else
 	[[ $@ == "" ]] && { echo "No destinations listed. Exiting..."; exit 1; }
@@ -125,14 +125,18 @@ else
 	destinations_list=( "$@" )
 fi
 
-split_list=()
+# Generate random name for tmux session
+TMUX_NAME="simulterm-tmux-session-$( tr -dc a-z0-9 </dev/urandom | head -c 5 )"
+
+tmux new-session -d -s "$TMUX_NAME" "${COMMAND//####/"${destinations_list[0]}"}" ';' \
+    set-option -w synchronize-panes ';' \
+    set-option remain-on-exit on
+
+# All except the first destination
 for ssh_entry in "${destinations_list[@]:1}"; do
-	
-    split_list+=( split-pane "${COMMAND//####/"$ssh_entry"}" ';' )
+    tmux split-window -t "$TMUX_NAME" "${COMMAND//####/"$ssh_entry"}"
+	# Retile the windows
+	tmux select-layout -t "$TMUX_NAME" tiled
 done
 
-tmux new-session "${COMMAND//####/"${destinations_list[0]}"}" ';' \
-    "${split_list[@]}" \
-    select-layout tiled ';' \
-    set-option -w synchronize-panes ';' \
-	set-option remain-on-exit on
+tmux attach -t "$TMUX_NAME"
