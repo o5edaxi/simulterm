@@ -6,6 +6,7 @@ Throught the -l flag, the script can gather the destination addresses automatica
 
 
 ### Usage:
+
 Pass the destinations as arguments to the script, and then enter the command to be executed with \"####\" as a placeholder for the addresses.
 For example:
 ```
@@ -23,4 +24,9 @@ ssh admin@2001:db8::1
 The placeholder can be used one or more times in the command.
 
 ### Autodiscovery:
+
 Run the script with the -l flag to run IPv6 autodiscovery on the local link and contact those addresses instead (the hosts must have fe80 addresses and respond to pings for this feature to work).
+
+### License
+
+This project is licensed under the [MIT License](LICENSE).
