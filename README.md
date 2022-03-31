@@ -10,7 +10,7 @@ Throught the -l flag, the script can gather the destination addresses automatica
 Pass the destinations as arguments to the script, and then enter the command to be executed with \"####\" as a placeholder for the addresses.
 For example:
 ```
-./simulterm 192.0.2.1 192.0.2.3 host.example.com 2001:db8::1
+./simulterm.sh 192.0.2.1 192.0.2.3 host.example.com 2001:db8::1
 ssh admin@####
 ```
 will open interactive ssh sessions towards all the selected destinations:
