@@ -27,6 +27,11 @@ The placeholder can be used one or more times in the command.
 
 Run the script with the -l flag to run IPv6 autodiscovery on the local link and contact those addresses instead (the hosts must have fe80 addresses and respond to pings for this feature to work).
 
+### Prerequisites
+
+* tmux
+* iproute2
+
 ### License
 
 This project is licensed under the [MIT License](LICENSE).
