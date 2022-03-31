@@ -2,7 +2,7 @@
 
 This bash script takes a command and runs it in multiple terminal panes interactively using tmux, replacing a "####" token with a series of strings (which can be IP addresses, domains, or anything at all) passed as arguments to the script.
 
-Throught the -l flag, the script can gather the destination addresses automatically by discovering IPv6 hosts on the link-local network. This makes it very useful for example during the configuration of multiple network devices whose IP is not known or configured yet, but RFC4862 autoconfiguration has been performed. The resulting sessions are fully interactive and accept keyboard input from the user.
+Through the -l flag, the script can gather the destination addresses automatically by discovering IPv6 hosts on the link-local network. This makes it very useful for example during the configuration of multiple network devices whose IP is not known or configured yet, but RFC4862 autoconfiguration has been performed. The resulting sessions are fully interactive and accept keyboard input from the user.
 
 
 ### Usage
