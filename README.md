@@ -21,7 +21,20 @@ ssh admin@host.example.com
 ssh admin@2001:db8::1
 ```
 
-The #### placeholder can be used one or more times in the initial command. The interactive session can then be navigated with regular tmux shortcuts.
+The #### placeholder can be used one or more times in the initial command. The interactive session can then be navigated with regular tmux shortcuts, for example:
+```
+# Disable multi-input
+CTRL-B
+:setw synchronize-panes
+# Select different pane with arrow keys
+CTRL-B
+# Expand pane
+CTRL-B
+z
+# Kill session
+CTRL-B
+:kill-session
+```
 
 ### Autodiscovery
 
