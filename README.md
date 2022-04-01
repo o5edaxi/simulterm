@@ -21,7 +21,7 @@ ssh admin@host.example.com
 ssh admin@2001:db8::1
 ```
 
-The placeholder can be used one or more times in the command.
+The #### placeholder can be used one or more times in the initial command. The interactive session can then be navigated with regular tmux shortcuts.
 
 ### Autodiscovery
 
