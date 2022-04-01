@@ -35,7 +35,6 @@ z
 CTRL-B
 :kill-session
 ```
-
 ### Autodiscovery
 
 Run the script with the -l flag to run IPv6 autodiscovery on the local link and contact those addresses instead (the hosts must have fe80 addresses and respond to pings for this feature to work).
