@@ -1,8 +1,15 @@
 #!/bin/bash
 
+SHORTCUT_1="C-V"
+SHORTCUT_2="C-T"
+SCRIPT_1="simulterm-script_1"
+SCRIPT_2="simulterm-script_2"
+TMUX_LOCATION="/usr/bin/tmux"
+
 usage="The following options are supported:
 
 	-h	Displays instructions
+	-f	Read from file
 	-l	Link-local mode
 	-x	Bash debug
 
@@ -24,16 +31,28 @@ Usage:
 
 	The placeholder can be used one or more times in the command.
 	
+	Reading from file:
+	
+	Run the script with the -f flag to pass a TSV file as argument to the script and read destinations from it, as well as 2 optional values that can be pasted into the terminals using CTRL-V and CTRL-T shortcuts (after the prefix shortcut). E.g.:
+		
+		192.0.2.1	foo	bar
+		192.0.2.2	baz	cat
+		192.0.2.3	dog	bird
+	
+	If the -l flag is also set, destinations will be autodiscovered and the first column will be ignored. Values will be assigned randomly to the discovered IPs and up to exhaustion.
+	
 	Autodiscovery:
 
 	Run the script with the -l flag to run IPv6 autodiscovery on the local link and contact those addresses instead (the hosts must have fe80 addresses and respond to pings for this feature to work).
 "
 
-while getopts 'hlx' option; do
+while getopts 'hflx' option; do
   case "$option" in
     h) echo "$help"
        exit
        ;;
+	f) FILE_BASED=1
+	   ;;
 	l) LINK_LOCAL=1
        ;;
 	x) DEBUG=1
@@ -51,6 +70,10 @@ if (( DEBUG == 1 )); then
 fi
 
 command -v tmux &> /dev/null || { echo "This script requires tmux to run. Try with \"sudo apt install tmux\". Exiting..." ; exit 1; }
+
+if (( FILE_BASED == 1 )); then
+	[[ -f "$1" ]] || { echo "-f flag set but no TSV file provided. Exiting..." ; exit 1; }
+fi
 
 echo "Type in the command to be replicated, using \"####\" as a placeholder for the address:"
 read -r COMMAND
@@ -118,19 +141,49 @@ if (( LINK_LOCAL == 1 )); then
 	
 	echo "Autodiscovery complete. Found $FOUND_ADDRESSES addresses."
 	destinations_list=( "${PING6_REPLIES[@]}" )
-	
+
+elif (( FILE_BASED == 1 )); then
+	while IFS=$'\t' read -r -a filedestinations
+	do
+		destinations_list+=( "${filedestinations[0]}" )
+	done < "$1"
+
 else
 	[[ $@ == "" ]] && { echo "No destinations listed. Exiting..."; exit 1; }
-	
 	destinations_list=( "$@" )
 fi
 
 # Generate random name for tmux session
 TMUX_NAME="simulterm-tmux-session-$( tr -dc a-z0-9 </dev/urandom | head -c 5 )"
 
-tmux new-session -d -s "$TMUX_NAME" "${COMMAND//####/"${destinations_list[0]}"}" ';' \
-    set-option -w synchronize-panes ';' \
-    set-option remain-on-exit on
+# Generate script files
+if (( FILE_BASED == 1 )); then
+	> "$SCRIPT_1"
+	> "$SCRIPT_2"
+	echo "$TMUX_LOCATION" set-option -w -t "$TMUX_NAME" synchronize-panes off >> "$SCRIPT_1"
+	echo "$TMUX_LOCATION" set-option -w -t "$TMUX_NAME" synchronize-panes off >> "$SCRIPT_2"
+	LINE_NUMBER=0
+	while IFS=$'\t' read -r -a userarray
+	do
+		echo "$TMUX_LOCATION" send-keys -t "$TMUX_NAME"":0.""$LINE_NUMBER" "${userarray[1]}" >> "$SCRIPT_1"
+		echo "$TMUX_LOCATION" send-keys -t "$TMUX_NAME"":0.""$LINE_NUMBER" "${userarray[2]}" >> "$SCRIPT_2"
+		LINE_NUMBER=$(( LINE_NUMBER + 1 ))
+	done < "$1"
+	echo "$TMUX_LOCATION" set-option -w -t "$TMUX_NAME" synchronize-panes on >> "$SCRIPT_1"
+	echo "$TMUX_LOCATION" set-option -w -t "$TMUX_NAME" synchronize-panes on >> "$SCRIPT_2"
+fi
+
+if (( FILE_BASED == 1 )); then
+	tmux new-session -d -s "$TMUX_NAME" "${COMMAND//####/"${destinations_list[0]}"}" ';' \
+		set-option -w synchronize-panes ';' \
+		set-option remain-on-exit on ';' \
+		bind-key "$SHORTCUT_1" run-shell './'"$SCRIPT_1" ';' \
+		bind-key "$SHORTCUT_2" run-shell './'"$SCRIPT_2"
+else
+	tmux new-session -d -s "$TMUX_NAME" "${COMMAND//####/"${destinations_list[0]}"}" ';' \
+		set-option -w synchronize-panes ';' \
+		set-option remain-on-exit on
+fi
 
 # All except the first destination
 for ssh_entry in "${destinations_list[@]:1}"; do
