@@ -35,6 +35,43 @@ z
 CTRL-B
 :kill-session
 ```
+### Reading from file
+
+Run the script with the -f flag to pass a TSV file as argument to the script and read destinations from it, as well as 2 optional values that can be pasted into the terminals using CTRL-V and CTRL-T shortcuts (after the tmux prefix shortcut). E.g.:
+```	
+192.0.2.1	foo	bar
+192.0.2.2	baz	cat
+192.0.2.3	dog	bird
+```
+Pane 1:
+```
+CTRL+B
+CTRL+V
+  foo
+CTRL+B
+CTRL+T
+  bar
+```
+Pane 2:
+```
+CTRL+B
+CTRL+V
+  baz
+CTRL+B
+CTRL+T
+  cat
+```
+Pane 3:
+```
+CTRL+B
+CTRL+V
+  dog
+CTRL+B
+CTRL+T
+  bird
+```
+If the -l flag is also set, destinations will be autodiscovered and the first column will be ignored. Values will be assigned randomly to the discovered IPs and up to exhaustion.
+
 ### Autodiscovery
 
 Run the script with the -l flag to run IPv6 autodiscovery on the local link and contact those addresses instead (the hosts must have fe80 addresses and respond to pings for this feature to work).
