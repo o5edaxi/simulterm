@@ -171,6 +171,8 @@ if (( FILE_BASED == 1 )); then
 	done < "$1"
 	echo "$TMUX_LOCATION" set-option -w -t "$TMUX_NAME" synchronize-panes on >> "$SCRIPT_1"
 	echo "$TMUX_LOCATION" set-option -w -t "$TMUX_NAME" synchronize-panes on >> "$SCRIPT_2"
+	chmod +x "$SCRIPT_1"
+	chmod +x "$SCRIPT_2"
 fi
 
 if (( FILE_BASED == 1 )); then
